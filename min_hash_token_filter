@@ -1,0 +1,99 @@
+DELETE sunman_dupdocs
+
+GET /_cat
+
+PUT /sunman_dupdocs
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "my_shingle_filter": {
+          "type": "shingle",
+          "min_shingle_size": 2,
+          "max_shingle_size": 5,
+          "output_unigrams": false
+        },
+        "my_minhash_filter": {
+          "type": "min_hash",
+          "hash_count": 10,
+          "bucket_count": 512,
+          "hash_set_size": 1,
+          "with_rotation": true
+        },
+        "my_stemmer": {
+          "type": "stemmer",
+          "language": "english"
+        }
+      },
+      "analyzer": {
+        "my_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "my_shingle_filter",
+            "my_stemmer",
+            "my_minhash_filter"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "message": {
+        "type": "text",
+        "analyzer": "my_analyzer"
+      }
+    }
+  }
+}
+
+
+
+
+put /sunman_dupdocs/_doc/1
+{"message":"Despite the rising sun, the sleepy town remained quiet, revealing no signs of the looming adventures the day held."}
+
+
+put /sunman_dupdocs/_doc/2
+{"message":"Under the vibrant twilight, the tranquil village stayed still, betraying no hint of the imminent escapades the night promised." }
+
+put /sunman_dupdocs/_doc/3
+{"message":"the sleepy town remained quiet after a day full out drinking"}
+
+put /sunman_dupdocs/_doc/4
+{"message":"the signs of looming adventure was evident by the smiles on their faces"}
+
+
+put /sunman_dupdocs/_doc/5
+{"message":"Cabo was vibrant with nonstop outdoor adventures.  During the hours of 9-5, Cabo never remained quiet"}
+
+
+
+get /sunman_dupdocs/_search
+{
+  "query": {
+    "match": {
+      "message": "the sleepy town remained quiet"
+    }
+  }
+}
+
+
+get /sunman_dupdocs/_search
+{
+  "query": {
+    "match": {
+      "message": "full out drinking"
+    }
+  }
+}
+
+
+get /sunman_dupdocs/_search
+{
+  "query": {
+    "match": {
+      "message": "looming adventure"
+    }
+  }
+}
